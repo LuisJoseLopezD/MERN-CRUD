@@ -3,18 +3,13 @@ import Swal from 'sweetalert2'
 import './App.css'
 import withReactContent from 'sweetalert2-react-content'
 
-// firebase
-import { collection, getDocs, getDoc, deleteDoc, doc, addDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig/firebase';
 
 const App = () => {
 
+    // Importantes
     const clickRef = React.useRef(null);
     const resetDescription = React.useRef(null);
     const resetStock = React.useRef(null);
-
-    // DB firestore
-    const productsCollection = collection(db, 'products');
 
     // sweet alert confirmation
     const MySwal = withReactContent(Swal);
@@ -23,72 +18,54 @@ const App = () => {
     const [products, setProducts] = useState([]);
     let [idproduct, setIdproduct] = useState(0);
 
+    // Create products
+    const [description, setDescription] = useState("");
+    const [stock, setStock] = useState(0);
+
     // Modal State
     const [openModal, setOpenModal] = useState("");
+    const handleAddProduct = () => { setOpenModal("addproduct"); }
+    const handleEdit = () => { setOpenModal("edit"); }
+    const handleDelete = () => { setOpenModal("delete"); }
 
-    const handleAddProduct = () => {
-        setOpenModal("addproduct");
-    }
-
-    const handleEdit = () => {
-        setOpenModal("edit");
-    }
-
-    const handleDelete = () => {
-        setOpenModal("delete");
-    }
-
+    // Resetear las varibles;
     const resetVariables = () => {
         resetDescription.current.value = "";
         resetStock.current.value = 0;
         setIdproduct(0);
     }
 
-    // Create products
-    const [description, setDescription] = useState("");
-    const [stock, setStock] = useState(0);
-
-    const store = async (e) => {
+    // Crear producto
+    const createProduct = async (e) => {
         e.preventDefault();
         clickRef.current.click()
         MySwal.fire({
             icon: 'success',
             title: <p>Product Created</p>,
         })
-        await addDoc(productsCollection, { description: description, stock: stock })
     }
 
-    // show all the docs
-    const getProducts = async () => {
-        const data = await getDocs(productsCollection)
-        // console.log(data.docs);
-        setProducts(
-            data.docs.map((doc) => ({
-                ...doc.data(), id: doc.id
-            }))
-        )
-        // console.log(products);
-    }
-
-    // delete doc
+    // Borrar producto
     const deleteProduct = async (id) => {
-        const productDoc = doc(db, "products", id);
+
         clickRef.current.click()
         MySwal.fire({
             icon: 'success',
             title: <p>Product deleted</p>,
         })
-        await deleteDoc(productDoc);
         getProducts();
     }
 
-    //6. UseEffect
+    // Obtener los productos
+    const getProducts = async () => {
+        console.log("working");
+    }
+
+    // Mostrar todos los productos
     useEffect(() => {
         getProducts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [products])
-
-    //7. Vista principal
 
     return (
         <>
@@ -136,7 +113,7 @@ const App = () => {
                                     <button
                                         disabled={stock === 0 || description === "" ? true : false}
                                         onClick={(e) => {
-                                            store(e);
+                                            createProduct(e);
                                         }}
                                         type="button" className="btn btn-primary">
                                         Save changes
@@ -205,7 +182,7 @@ const App = () => {
                     <div className="table-title">
                         <div className="row">
                             <div className="col-sm-6">
-                                <h2>Crud Firestore with React</h2>
+                                <h2>Crud FirecreateProduct with React</h2>
                             </div>
                             <div className="col-sm-6">
                                 <button
