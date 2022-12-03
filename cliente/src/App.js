@@ -182,7 +182,7 @@ const App = () => {
                     <div className="table-title">
                         <div className="row">
                             <div className="col-sm-6">
-                                <h2>Crud FirecreateProduct with React</h2>
+                                <h2>MERN CRUD</h2>
                             </div>
                             <div className="col-sm-6">
                                 <button
