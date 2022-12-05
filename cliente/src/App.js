@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Swal from 'sweetalert2'
-import './App.css'
+
+import './App.css';
+
+import Axios from 'axios';
+import uniqid from 'uniqid';
+import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
+
 
 
 const App = () => {
@@ -36,13 +41,30 @@ const App = () => {
     }
 
     // Crear producto
-    const createProduct = async (e) => {
-        e.preventDefault();
-        clickRef.current.click()
-        MySwal.fire({
-            icon: 'success',
-            title: <p>Product Created</p>,
-        })
+    const createProduct = async (params) => {
+
+        console.log(params);
+
+        await Axios
+            .post('api/products/addproduct', params,
+                {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*'
+                    }
+                })
+            .then(function (response) {
+                // console.log(response.data);
+                clickRef.current.click()
+                MySwal.fire({
+                    icon: 'success',
+                    title: <p>Product Created</p>,
+                })
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }
 
     // Borrar producto
@@ -112,8 +134,8 @@ const App = () => {
                                 <div className="modal-footer">
                                     <button
                                         disabled={stock === 0 || description === "" ? true : false}
-                                        onClick={(e) => {
-                                            createProduct(e);
+                                        onClick={() => {
+                                            createProduct({ name: description, stock: stock, id: uniqid() });
                                         }}
                                         type="button" className="btn btn-primary">
                                         Save changes
