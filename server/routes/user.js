@@ -12,11 +12,6 @@ const userSchema = new products({
 
 const userModel = mongoose.model('products', userSchema);
 
-//test
-// router.get('/ejemplo',(req,res) => {
-//     res.end('Saludos carga desde ruta ejemplo');
-// })
-
 //add product
 router.post('/addproduct',(req,res) => {
     const newUser = new userModel({
@@ -26,7 +21,43 @@ router.post('/addproduct',(req,res) => {
     })
     newUser.save(function(err){
         if (!err){
-            res.send("product added!!!")
+            res.send("product added!!")
+        } else {
+            res.send(err);
+        }
+    })
+})
+
+//get products
+router.get('/getproducts',(req,res) => {
+    userModel.find({},function(docs,err){
+        if (!err){
+            res.send(docs)
+        } else {
+            res.send(err);
+        }
+    })
+})
+
+//edit product
+router.post('/editproduct',(req,res) => {
+    userModel.findOneAndUpdate({id:req.body.id},{
+        name: req.body.name,
+        stock: req.body.stock
+    }, (err) => {
+        if (!err){
+            res.send('Product updated!!')
+        } else {
+            res.send(err);
+        }
+    })
+})
+
+//delete product
+router.post('/deleteproduct',(req,res) => {
+    userModel.findOneAndDelete({id:req.body.id}, (err) => {
+        if (!err){
+            res.send('Product deleted!!')
         } else {
             res.send(err);
         }

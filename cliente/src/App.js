@@ -21,11 +21,12 @@ const App = () => {
 
     // Products
     const [products, setProducts] = useState([]);
-    let [idproduct, setIdproduct] = useState(0);
+    const [idproduct, setIdproduct] = useState(0);
 
     // Create products
     const [description, setDescription] = useState("");
     const [stock, setStock] = useState(0);
+    const [contador, setContador] = useState(0);
 
     // Modal State
     const [openModal, setOpenModal] = useState("");
@@ -42,9 +43,7 @@ const App = () => {
 
     // Crear producto
     const createProduct = async (params) => {
-
         console.log(params);
-
         await Axios
             .post('api/products/addproduct', params,
                 {
@@ -53,11 +52,59 @@ const App = () => {
                     }
                 })
             .then(function (response) {
-                // console.log(response.data);
-                clickRef.current.click()
+                setContador(contador + 1);
+                clickRef.current.click();
                 MySwal.fire({
                     icon: 'success',
-                    title: <p>Product Created</p>,
+                    title: <p>{response.data}</p>,
+                })
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+
+    // Editar producto
+    const editProduct = async (params) => {
+        console.log(params);
+        await Axios
+            .post('api/products/editproduct', params,
+                {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*'
+                    }
+                })
+            .then(function (response) {
+                setContador(contador + 1);
+                clickRef.current.click();
+                MySwal.fire({
+                    icon: 'success',
+                    title: <p>{response.data}</p>,
+                })
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+
+    // Borrar producto
+    const deleteProduct = async (id) => {
+        console.log(id);
+        await Axios
+            .post('api/products/deleteproduct', id,
+                {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*'
+                    }
+                })
+            .then(function (response) {
+                setContador(contador + 1);
+                clickRef.current.click();
+                MySwal.fire({
+                    icon: 'success',
+                    title: <p>{response.data}</p>,
                 })
             })
             .catch(function (error) {
@@ -67,27 +114,23 @@ const App = () => {
 
     }
 
-    // Borrar producto
-    const deleteProduct = async (id) => {
-
-        clickRef.current.click()
-        MySwal.fire({
-            icon: 'success',
-            title: <p>Product deleted</p>,
-        })
-        getProducts();
-    }
-
     // Obtener los productos
     const getProducts = async () => {
-        console.log("working");
+        Axios.get('api/products/getproducts')
+            .then((response) => {
+                console.log(response.data);
+                setProducts(response.data);
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }
 
-    // Mostrar todos los productos
     useEffect(() => {
         getProducts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [products])
+    }, [contador])
 
     return (
         <>
@@ -104,9 +147,8 @@ const App = () => {
                                         onClick={() => {
                                             resetVariables();
                                         }}
-                                        ref={clickRef} type="button"
-                                        className="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close">
+                                        ref={clickRef} type="button" className="btn-close"
+                                        data-bs-dismiss="modal" aria-label="Close">
                                     </button>
                                 </div>
                                 <div className="modal-body">
@@ -155,19 +197,52 @@ const App = () => {
                                 <>
                                     <div className="modal-header">
                                         <h5 className="modal-title" id="exampleModalLabel">Edit Product</h5>
-                                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button
+                                            onClick={() => {
+                                                resetVariables();
+                                            }}
+                                            ref={clickRef} type="button" className="btn-close"
+                                            data-bs-dismiss="modal" aria-label="Close">
+                                        </button>
                                     </div>
                                     <div className="modal-body">
                                         <form>
                                             <div className="form-group">
-                                                <input style={{ marginBottom: '10px' }} type="text" className="form-control" id="product" aria-describedby="product" placeholder="Product" />
-                                                <input type="text" className="form-control" id="stock" aria-describedby="stock" placeholder="Stock" />
+                                                <input
+                                                    ref={resetDescription}
+                                                    defaultValue=""
+                                                    onChange={(e) => setDescription(e.target.value)}
+                                                    style={{ marginBottom: '10px' }} type="text"
+                                                    className="form-control" id="product"
+                                                    aria-describedby="product" placeholder="Product"
+                                                />
+                                                <input
+                                                    ref={resetStock}
+                                                    defaultValue="0"
+                                                    onChange={(e) => setStock(e.target.value)}
+                                                    type="text" className="form-control"
+                                                    id="stock" aria-describedby="stock" placeholder="Stock"
+                                                />
                                             </div>
                                         </form>
                                     </div>
                                     <div className="modal-footer">
-                                        <button type="button" className="btn btn-primary">Save changes</button>
-                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button
+                                            disabled={stock === 0 || description === "" ? true : false}
+                                            onClick={() => {
+                                                editProduct({ name: description, stock: stock, id: idproduct });
+                                            }}
+                                            type="button" className="btn btn-primary">
+                                            Save changes
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                resetVariables();
+                                            }}
+                                            type="button" className="btn btn-secondary"
+                                            data-bs-dismiss="modal">
+                                            Close
+                                        </button>
                                     </div>
                                 </>
                                 :
@@ -175,7 +250,10 @@ const App = () => {
                                     <>
                                         <div className="modal-header">
                                             <h5 className="modal-title" id="exampleModalLabel">Delete Product</h5>
-                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <button
+                                                ref={clickRef} type="button" className="btn-close"
+                                                data-bs-dismiss="modal" aria-label="Close">
+                                            </button>
                                         </div>
                                         <div className="modal-body">
                                             <p>Are you sure do you want to delete this product?</p>
@@ -183,12 +261,16 @@ const App = () => {
                                         <div className="modal-footer">
                                             <button
                                                 onClick={() => {
-                                                    deleteProduct(idproduct);
+                                                    deleteProduct({id:idproduct});
                                                 }}
                                                 type="button" className="btn btn-primary">
                                                 Save changes
                                             </button>
-                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button
+                                                type="button" className="btn btn-secondary"
+                                                data-bs-dismiss="modal">
+                                                Close
+                                            </button>
                                         </div>
                                     </>
                                     :
@@ -224,7 +306,7 @@ const App = () => {
                                 <th>#</th>
                                 <th>Product</th>
                                 <th>Stock</th>
-                                <th>Actions</th>
+                                <th style={{ textAlign: 'center' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -232,17 +314,18 @@ const App = () => {
                             {products?.map?.((item, index) => (
                                 <tr key={index + 1}>
                                     <td>{index + 1}</td>
-                                    <td>{item.description}</td>
+                                    <td>{item.name}</td>
                                     <td>{item.stock}</td>
                                     <td className="d-flex justify-content-center align-items-center">
                                         <button
                                             onClick={() => {
+                                                setIdproduct(item.id);
                                                 handleEdit();
                                             }}
                                             style={{ background: 'none', border: 'none' }}
                                             type="button" className="btn btn-primary"
                                             data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                            <i style={{ color: 'yellow' }} className="fa-solid fa-pen-to-square"></i>
+                                            <i style={{ color: 'orange' }} className="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <button
                                             onClick={() => {
